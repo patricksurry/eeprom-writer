@@ -7,4 +7,5 @@ dependencies:
     - flake8
     - flake8-black
     - mypy
+    - tqdm
 

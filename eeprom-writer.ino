@@ -134,8 +134,19 @@ void loop()
       case 'W': WriteEEPROM(); break;
       case 'Z': BulkWriteEEPROM(); break;
       case 'C': ChecksumEEPROM(); break;
+      case 'H': 
+      case '?' & 0xDF: 
+        Serial.println("eeprom-writer supports these single letter commands");
+        Serial.println("  V - show eeprom-writer version"); 
+        Serial.println("  P - set write protect"); 
+        Serial.println("  U - unset write protect"); 
+        Serial.println("  R <address> [<length>] - show hex length(=$10) bytes read from hex address");
+        Serial.println("  W <address> : <data> <data> ... - write data bytes to address");
+        Serial.println("  Z <address> - bulk write following lines of b64-encoded zlib data to address");
+        Serial.println("  C <address> <length> - show checksum of hex length bytes at hex address");
+        break;
       case 0: break; // empty string. Don't mind ignoring this.
-      default: Serial.println("ERR bad command"); break;
+      default: Serial.println("ERR unknown command, try ?"); break;
     }
   }
 }

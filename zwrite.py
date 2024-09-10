@@ -3,13 +3,13 @@
 
 from serial import Serial
 from serial.tools.list_ports import comports  # type: ignore
-from time import sleep
 import argparse
 import sys
 from functools import reduce
 
 from zlib import compress
 from base64 import b64encode
+from tqdm import tqdm
 
 
 eeprom_size = 1 << 15           # 32K eeprom
@@ -103,15 +103,22 @@ await_response()
 
 # write each line of encoded payload, and wait for ack
 ok = True
-for line in chunked(payload):
-    conn.write(line + b'\n')
-    ack = await_response(show=False)
-    ok = ack == str(len(line))
-    if not ok:
-        print(f"(arduino reported unexpected line length {ack})")
-        break
-    print('.', end='')
-    sys.stdout.flush()
+with tqdm(
+        total=len(payload),
+        desc='writing b64z',
+        bar_format='{desc}: {bar} {percentage:3.0f}% {remaining} {rate_fmt}',
+        unit='bytes',
+        unit_scale=True
+        ) as progress:
+    for line in chunked(payload):
+        conn.write(line + b'\n')
+        ack = await_response(show=False)
+        ok = ack == str(len(line))
+        if not ok:
+            print(f"(arduino reported unexpected line length {ack})")
+            break
+        sys.stdout.flush()
+        progress.update(len(line))
 
 print()
 
